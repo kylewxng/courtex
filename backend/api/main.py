@@ -8,7 +8,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://uuom4bb4qjj4s5vikklkowtgae0xksww.lambda-url.us-west-2.on.aws"],
+    allow_origins=["http://localhost:3000", "https://courtex.vercel.app/"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
