@@ -1,7 +1,13 @@
-## Courtex
+# Courtex
 
-**Courtex** is a natural language interface for querying NBA play-by-play data from the 2024-25 season. You ask a question in plain English, it retrieves semantically similar plays from a vector store, feeds them to an LLM with a structured prompt, and returns a written analysis alongside a shot chart rendered directly from the play coordinates. The backend is a FastAPI app deployed to AWS Lambda via Mangum, with Supabase as the vector database using pgvector for similarity search and Groq running Llama 3.3 70B for inference. The technically interesting part is the dual retrieval path: one query finds plays for the LLM context window, and a second pair of queries (biased toward "made" and "missed" variants of the same question) finds plays for the shot chart, so the visualization and the analysis are pulled independently rather than sharing a single result set.
+Ask any question about an NBA play from the 2024-25 season, get the top matched plays back as a written breakdown plus a shot chart showing where those shots were taken on the court.
 
+Live demo: https://courtex.vercel.app
+
+![Courtex screenshot #1](docs/screenshot1.png)
+![Courtex screenshot #1](docs/screenshot2.png)
+
+Courtex is a natural language interface for querying NBA shot data from the 2024-25 season. You ask a question in plain English, it retrieves semantically similar plays from a vector store, feeds them to an LLM with a structured prompt, and returns a written analysis alongside a shot chart rendered directly from the play coordinates. The backend is a FastAPI app deployed to AWS Lambda via Mangum, with Supabase as the vector database using pgvector for similarity search and Groq running Llama 3.3 70B for inference. The technically interesting part is the dual retrieval path: one query finds plays for the LLM context window, and a second pair of queries (biased toward "made" and "missed" variants of the same question) finds plays for the shot chart, so the visualization and the analysis are pulled independently rather than sharing a single result set.
 
 ## Architecture
 
@@ -24,7 +30,6 @@ FastAPI (AWS Lambda via Mangum)
 React renders ReactMarkdown + D3 court diagram
 ```
 
-
 ## Stack
 
 - Frontend: React, D3
@@ -33,7 +38,6 @@ React renders ReactMarkdown + D3 court diagram
 - Vector DB: Supabase with pgvector
 - Embeddings: sentence-transformers (all-MiniLM-L6-v2)
 - Deployment: AWS Lambda + Lambda Function URL, Vercel (frontend)
-
 
 ## Local Setup
 
@@ -72,10 +76,9 @@ npm start
 
 The React app runs on `http://localhost:3000` and proxies queries to `http://localhost:8000` by default. For production, set `REACT_APP_API_URL` to your Lambda Function URL in `frontend/.env.production`.
 
-
 ## Data Pipeline
 
-Play-by-play data is pulled from the NBA Stats API and ingested into Supabase. Run these once to populate the database:
+Shot data is pulled from the NBA Stats API's play-by-play endpoints and ingested into Supabase. Run these once to populate the database:
 
 ```bash
 # Pull shot data from the NBA API and load into Supabase
@@ -85,10 +88,9 @@ python backend/data/ingest.py
 python backend/data/embed.py
 ```
 
-`ingest.py` fetches the first 200 games of the 2024-25 season via `PlayByPlayV3`, filters to made and missed shots, and upserts into a `plays` table. `embed.py` batches all rows without embeddings through `all-MiniLM-L6-v2` and writes the vectors back to Supabase.
+`ingest.py` fetches the first 200 games of the 2024-25 season via `PlayByPlayV3`, filters to made and missed shot events, and upserts into a `plays` table. `embed.py` batches all rows without embeddings through `all-MiniLM-L6-v2` and writes the vectors back to Supabase.
 
 The Supabase table needs a `match_plays` RPC function backed by pgvector for the similarity queries to work.
-
 
 ## Project Structure
 
