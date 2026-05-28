@@ -122,3 +122,5 @@ button:disabled {
   margin-bottom: 8px;
   color: #d0d0d0;
 }
+
+.loading-text { color: #888; font-style: italic; margin-top: 1rem; }

@@ -24,9 +24,11 @@ function App() {
           disabled={loading}
           onClick={async () => {
             setLoading(true);
+            setAnswer("");
+            setPlays([]);
             try {
               const response = await fetch(
-                "https://uuom4bb4qjj4s5vikklkowtgae0xksww.lambda-url.us-west-2.on.aws/query",
+                `${process.env.REACT_APP_API_URL || "http://localhost:8000"}/query`,
                 {
                   method: "POST",
                   headers: {
@@ -49,6 +51,7 @@ function App() {
           {loading ? "Loading..." : "Search"}
         </button>
       </div>
+      {loading && <p className="loading-text">Searching plays...</p>}
       {answer && (
         <div className="answer">
           <ReactMarkdown>{answer}</ReactMarkdown>
